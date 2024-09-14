@@ -214,7 +214,6 @@ module suiwin::suiwin {
         });
     }
 
-
     entry  fun game_stake_dice(r : &Random,game_data: &mut GameData, p_guess: u8, coin_v: Coin<SUI>, ctx: &mut TxContext){
 
         let coin_value = coin::value(&coin_v);
@@ -260,6 +259,8 @@ module suiwin::suiwin {
         };
         count
     }
+
+
 
 
 
@@ -384,27 +385,7 @@ module suiwin::suiwin {
         });
     }
 
-    entry  fun game_stake_21_surrender(game_data: &mut GameData, ctx: &mut TxContext){
-        let Game21 {
-            id,
-            bet,
-            d,
-            p,
-        }  =  dof::remove(&mut game_data.id,tx_context::sender(ctx));
-        let len = vector::length(&p);
-        assert!(len == 2, ERounds);
-        let vol = bet/2;
-        let coin_v = coin::take(&mut game_data.balance, vol, ctx);
-        transfer::public_transfer(coin_v,tx_context::sender(ctx));
-        object::delete(id);
-        emit(Outcome21 {
-            bet:bet,
-            d: d,
-            p: p,
-            gamenum:3,
-        });
 
-    }
 
 
     entry  fun game_stake_21_stand(r : &Random,game_data: &mut GameData, ctx: &mut TxContext){
@@ -417,17 +398,15 @@ module suiwin::suiwin {
         object::delete(id);
         let len = vector::length(&p);
         let mut vol = calculate_hand_value(&p);
-        let mut five = false;
+    
         if(len >=5){
             vol =21;
-            five = true;
+ 
         };
         let resultb = compared(r,&mut d,vol,ctx);
         if(resultb ==1){
-            let mut winvol = bet*2;
-            if(five){
-                winvol =  bet*3;
-            };
+            let winvol = bet*2;
+
             let wincoin = coin::take(&mut game_data.balance, winvol, ctx);
             transfer::public_transfer(wincoin,tx_context::sender(ctx));
         }else if(resultb ==2){
@@ -461,7 +440,7 @@ module suiwin::suiwin {
         let mut total_value = 0;
         let mut ace_count = 0;
 
-
+       
         let card_count = vector::length(cards);
         let mut i = 0;
         while (i < card_count) {
@@ -474,7 +453,7 @@ module suiwin::suiwin {
             i =i + 1;
         };
 
-  
+        
         while (total_value > 21 && ace_count > 0) {
             total_value =total_value - 10;
             ace_count =ace_count - 1;
@@ -483,7 +462,7 @@ module suiwin::suiwin {
         total_value
     }
 
- 
+  
     fun card_value(card: u8): u8 {
         if (card == 1) {
             11 
@@ -504,7 +483,7 @@ module suiwin::suiwin {
         };
         let len = vector::length(d);
         let mut result = 3;
-        if (dvol > 21) {
+        if (dvol > 21) { 
             result = 1;
         } else if (len >= 5) {
             dvol = 21;
