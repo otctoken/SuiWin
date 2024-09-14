@@ -151,7 +151,7 @@ module suiwin::suiwin {
     public entry fun up_sui(gamedata:&mut GameData,coin_value: Coin<SUI>){
         coin::put(&mut gamedata.balance, coin_value);
     }
-//.......................................................................coinflit.....................................................................
+
     entry  fun game_stake(r : &Random,game_data: &mut GameData, p_guess: u8, coin_v: Coin<SUI>, ctx: &mut TxContext){
 
         let coin_value = coin::value(&coin_v);
@@ -184,7 +184,6 @@ module suiwin::suiwin {
         });
     }
 
-//.......................................................................box.....................................................................
 
 
    entry  fun game_stake_box(r : &Random,game_data: &mut GameData, coin_v: Coin<SUI>, ctx: &mut TxContext){
@@ -215,7 +214,6 @@ module suiwin::suiwin {
         });
     }
 
-//...........................................dice......................................................................................
 
     entry  fun game_stake_dice(r : &Random,game_data: &mut GameData, p_guess: u8, coin_v: Coin<SUI>, ctx: &mut TxContext){
 
@@ -272,17 +270,15 @@ module suiwin::suiwin {
 
 
 
-
-       //...........................................21...............................................................................
-
-
-
     entry  fun game_stake_21_join(r : &Random,game_data: &mut GameData, coin_v: Coin<SUI>,ctx: &mut TxContext){
+        let coin_value = coin::value(&coin_v);
+        let contract_balance = balance::value(&game_data.balance);
+        assert!(contract_balance > coin_value*2, EInsufficientBalance);
         assert!(coin_value >= game_data.min_bet && coin_value <= game_data.max_bet, EAmountNot);
         coin::put(&mut game_data.balance, coin_v);
         let mut rg = random::new_generator(r, ctx);
         let card1 = random::generate_u8_in_range(&mut rg, 1, 13);
-        let card2 = random::generate_u8_in_range(&mut rg, 1, 13);
+        let card2 = random::generate_u8_in_range(&mut rg, 1, 13); 
         let card3 = random::generate_u8_in_range(&mut rg, 1, 13);
         let mut dcaeds = vector::empty<u8>();
         let mut pcaeds = vector::empty<u8>();
@@ -340,7 +336,7 @@ module suiwin::suiwin {
         vector::push_back(&mut p, card);
         let vol = calculate_hand_value(&p);
         if(vol < 22){
-            let resultb = compared(r,&mut d,vol,ctx);
+            let resultb = compared(r,&mut d,vol,ctx); 
             if(resultb ==1 ){
                 let winvol = (coin_value + bet)*2;
                 let wincoin = coin::take(&mut game_data.balance, winvol, ctx);
@@ -395,6 +391,8 @@ module suiwin::suiwin {
             d,
             p,
         }  =  dof::remove(&mut game_data.id,tx_context::sender(ctx));
+        let len = vector::length(&p);
+        assert!(len == 2, ERounds);
         let vol = bet/2;
         let coin_v = coin::take(&mut game_data.balance, vol, ctx);
         transfer::public_transfer(coin_v,tx_context::sender(ctx));
@@ -463,7 +461,7 @@ module suiwin::suiwin {
         let mut total_value = 0;
         let mut ace_count = 0;
 
-     
+
         let card_count = vector::length(cards);
         let mut i = 0;
         while (i < card_count) {
@@ -476,7 +474,7 @@ module suiwin::suiwin {
             i =i + 1;
         };
 
-
+  
         while (total_value > 21 && ace_count > 0) {
             total_value =total_value - 10;
             ace_count =ace_count - 1;
@@ -485,12 +483,12 @@ module suiwin::suiwin {
         total_value
     }
 
-    
+ 
     fun card_value(card: u8): u8 {
         if (card == 1) {
             11 
         } else if (card >= 11 && card <= 13) {
-            10
+            10 
         } else {
             card 
         }
@@ -506,7 +504,7 @@ module suiwin::suiwin {
         };
         let len = vector::length(d);
         let mut result = 3;
-        if (dvol > 21) { 
+        if (dvol > 21) {
             result = 1;
         } else if (len >= 5) {
             dvol = 21;
