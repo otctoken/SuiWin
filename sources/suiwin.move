@@ -273,7 +273,9 @@ module suiwin::suiwin {
 
 
 
-  
+       //...........................................21.............................................................................
+
+
 
     entry  fun game_stake_21_join(r : &Random,game_data: &mut GameData, coin_v: Coin<SUI>,ctx: &mut TxContext){
         let coin_value = coin::value(&coin_v);
@@ -346,11 +348,7 @@ module suiwin::suiwin {
                 let winvol = (coin_value + bet)*2;
                 let wincoin = coin::take(&mut game_data.balance, winvol, ctx);
                 transfer::public_transfer(wincoin,tx_context::sender(ctx));
-            }else if(resultb ==2){
-                let winvol = coin_value + bet;
-                let wincoin = coin::take(&mut game_data.balance, winvol, ctx);
-                transfer::public_transfer(wincoin,tx_context::sender(ctx));
-            }
+            };
         };
         emit(Outcome21 {
             bet:bet,
@@ -413,10 +411,6 @@ module suiwin::suiwin {
 
             let wincoin = coin::take(&mut game_data.balance, winvol, ctx);
             transfer::public_transfer(wincoin,tx_context::sender(ctx));
-        }else if(resultb ==2){
-            let winvol = bet;
-            let wincoin = coin::take(&mut game_data.balance, winvol, ctx);
-            transfer::public_transfer(wincoin,tx_context::sender(ctx));
         };
         emit(Outcome21 {
             bet:bet,
@@ -444,6 +438,7 @@ module suiwin::suiwin {
         let mut total_value = 0;
         let mut ace_count = 0;
 
+    
         let card_count = vector::length(cards);
         let mut i = 0;
         while (i < card_count) {
@@ -456,7 +451,7 @@ module suiwin::suiwin {
             i =i + 1;
         };
 
- 
+     
         while (total_value > 21 && ace_count > 0) {
             total_value =total_value - 10;
             ace_count =ace_count - 1;
@@ -465,7 +460,7 @@ module suiwin::suiwin {
         total_value
     }
 
-
+ 
     fun card_value(card: u8): u8 {
         if (card == 1) {
             11 
@@ -488,21 +483,17 @@ module suiwin::suiwin {
         };
         let len = vector::length(d);
         let mut result = 3;
-        if (dvol > 21) {
+        if (dvol > 21) { 
             result = 1;
         } else if (len >= 5) {
             dvol = 21;
             if (dvol < p) {
                 result = 1;
-            } else if (dvol == p) {
-                result = 2;
-            }
+            };
         } else {
             if (dvol < p) {
                 result = 1;
-            } else if (dvol == p) {
-                result = 2;
-            }
+            };
         };
         result
     }
