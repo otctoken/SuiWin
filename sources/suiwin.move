@@ -151,7 +151,7 @@ module suiwin::suiwin {
     public entry fun up_sui(gamedata:&mut GameData,coin_value: Coin<SUI>){
         coin::put(&mut gamedata.balance, coin_value);
     }
-
+//.......................................................................coinflit.....................................................................
     entry  fun game_stake(r : &Random,game_data: &mut GameData, p_guess: u8, coin_v: Coin<SUI>, ctx: &mut TxContext){
 
         let coin_value = coin::value(&coin_v);
@@ -184,6 +184,7 @@ module suiwin::suiwin {
         });
     }
 
+//.......................................................................box.....................................................................
 
 
    entry  fun game_stake_box(r : &Random,game_data: &mut GameData, coin_v: Coin<SUI>, ctx: &mut TxContext){
@@ -213,6 +214,8 @@ module suiwin::suiwin {
             result:0,
         });
     }
+
+//...........................................dice......................................................................................
 
     entry  fun game_stake_dice(r : &Random,game_data: &mut GameData, p_guess: u8, coin_v: Coin<SUI>, ctx: &mut TxContext){
 
@@ -270,6 +273,7 @@ module suiwin::suiwin {
 
 
 
+  
 
     entry  fun game_stake_21_join(r : &Random,game_data: &mut GameData, coin_v: Coin<SUI>,ctx: &mut TxContext){
         let coin_value = coin::value(&coin_v);
@@ -440,7 +444,6 @@ module suiwin::suiwin {
         let mut total_value = 0;
         let mut ace_count = 0;
 
-       
         let card_count = vector::length(cards);
         let mut i = 0;
         while (i < card_count) {
@@ -453,7 +456,7 @@ module suiwin::suiwin {
             i =i + 1;
         };
 
-        
+ 
         while (total_value > 21 && ace_count > 0) {
             total_value =total_value - 10;
             ace_count =ace_count - 1;
@@ -462,7 +465,7 @@ module suiwin::suiwin {
         total_value
     }
 
-  
+
     fun card_value(card: u8): u8 {
         if (card == 1) {
             11 
@@ -476,14 +479,16 @@ module suiwin::suiwin {
     fun compared(r : &Random,d:&mut vector<u8>,p:u8,ctx: &mut TxContext):(u8){
         let mut dvol = 0;
         let mut rg = random::new_generator(r, ctx);
-        while(dvol < 17){
+        let mut cardlen = 1;
+        while(dvol < 17 && cardlen < 5){
             let card = random::generate_u8_in_range(&mut rg, 1, 13);
             vector::push_back(d, card);
             dvol = calculate_hand_value(d);
+            cardlen = cardlen+1;
         };
         let len = vector::length(d);
         let mut result = 3;
-        if (dvol > 21) { 
+        if (dvol > 21) {
             result = 1;
         } else if (len >= 5) {
             dvol = 21;
