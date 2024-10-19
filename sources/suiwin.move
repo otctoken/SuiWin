@@ -273,9 +273,11 @@ module suiwin::suiwin {
 
 
 
-  
+       //...........................................21点.......gas低了获胜会有bug...............................................................................
 
-    entry  fun game_stake_21_join(r : &Random,game_data: &mut GameData, coin_v: Coin<SUI>,ctx: &mut TxContext){
+    //五龙 五张不爆相当于21点
+
+    entry  fun game_stake_21_join(r : &Random,game_data: &mut GameData, coin_v: Coin<SUI>,ctx: &mut TxContext){//0加入游戏state:u8,
         let coin_value = coin::value(&coin_v);
         let contract_balance = balance::value(&game_data.balance);
         assert!(contract_balance > coin_value*2, EInsufficientBalance);
@@ -283,7 +285,7 @@ module suiwin::suiwin {
         coin::put(&mut game_data.balance, coin_v);
         let mut rg = random::new_generator(r, ctx);
         let card1 = random::generate_u8_in_range(&mut rg, 1, 13);
-        let card2 = random::generate_u8_in_range(&mut rg, 1, 13); 
+        let card2 = random::generate_u8_in_range(&mut rg, 1, 13); //庄家的牌
         let card3 = random::generate_u8_in_range(&mut rg, 1, 13);
         let mut dcaeds = vector::empty<u8>();
         let mut pcaeds = vector::empty<u8>();
@@ -301,7 +303,7 @@ module suiwin::suiwin {
                 p: pcaeds,
             };
             let oid = object::id(&game);
-            dof::add(&mut game_data.id,oid, game); 
+            dof::add(&mut game_data.id,oid, game); //测试能用不，主要是消耗gas
             let winvol = coin_value + coin_value*3/2;
             let wincoin = coin::take(&mut game_data.balance, winvol, ctx);
             transfer::public_transfer(wincoin,tx_context::sender(ctx));
@@ -323,7 +325,7 @@ module suiwin::suiwin {
 
     }
 
-    entry  fun game_stake_21_double(r : &Random,game_data: &mut GameData, coin_v: Coin<SUI>,ctx: &mut TxContext){
+    entry  fun game_stake_21_double(r : &Random,game_data: &mut GameData, coin_v: Coin<SUI>,ctx: &mut TxContext){//1.翻倍要牌一张然后开牌， state:u8,
         let Game21 {
             id,
             bet,
@@ -341,7 +343,7 @@ module suiwin::suiwin {
         vector::push_back(&mut p, card);
         let vol = calculate_hand_value(&p);
         if(vol < 22){
-            let resultb = compared(r,&mut d,vol,ctx); 
+            let resultb = compared(r,&mut d,vol,ctx); //测试管用不.................
             if(resultb ==1 ){
                 let winvol = (coin_value + bet)*2;
                 let wincoin = coin::take(&mut game_data.balance, winvol, ctx);
@@ -350,7 +352,7 @@ module suiwin::suiwin {
                 let winvol = coin_value + bet;
                 let wincoin = coin::take(&mut game_data.balance, winvol, ctx);
                 transfer::public_transfer(wincoin,tx_context::sender(ctx));
-            }
+            };
         };
         emit(Outcome21 {
             bet:bet,
@@ -360,7 +362,7 @@ module suiwin::suiwin {
         });
     }
 
-    entry  fun game_stake_21_hit(r : &Random,game_data: &mut GameData, ctx: &mut TxContext){
+    entry  fun game_stake_21_hit(r : &Random,game_data: &mut GameData, ctx: &mut TxContext){//2要牌， state:u8,
         let Game21 {
             id,
             bet,
@@ -392,7 +394,7 @@ module suiwin::suiwin {
 
 
 
-    entry  fun game_stake_21_stand(r : &Random,game_data: &mut GameData, ctx: &mut TxContext){
+    entry  fun game_stake_21_stand(r : &Random,game_data: &mut GameData, ctx: &mut TxContext){//开牌 state:u8,
         let Game21 {
             id,
             bet,
@@ -427,7 +429,7 @@ module suiwin::suiwin {
     }
 
 
-    entry fun delete_Game21_b(id:ID,game_data: &mut GameData){
+    entry fun delete_Game21_b(id:ID,game_data: &mut GameData){//测试管用不....................
         let Game21_b {
             id,
             b,
@@ -444,6 +446,7 @@ module suiwin::suiwin {
         let mut total_value = 0;
         let mut ace_count = 0;
 
+        // 遍历每张牌
         let card_count = vector::length(cards);
         let mut i = 0;
         while (i < card_count) {
@@ -456,7 +459,7 @@ module suiwin::suiwin {
             i =i + 1;
         };
 
- 
+        // 尝试将A的值从11调整为1，以避免总点数超过21
         while (total_value > 21 && ace_count > 0) {
             total_value =total_value - 10;
             ace_count =ace_count - 1;
@@ -465,14 +468,14 @@ module suiwin::suiwin {
         total_value
     }
 
-
+    // 根据扑克牌值返回点数
     fun card_value(card: u8): u8 {
         if (card == 1) {
-            11 
+            11 // A初始为11
         } else if (card >= 11 && card <= 13) {
-            10 
+            10 // J, Q, K 都是10
         } else {
-            card 
+            card // 2到10的牌原值即点数
         }
     }
 
@@ -488,7 +491,7 @@ module suiwin::suiwin {
         };
         let len = vector::length(d);
         let mut result = 3;
-        if (dvol > 21) {
+        if (dvol > 21) { // 1闲家胜利，2平局，3庄家胜利
             result = 1;
         } else if (len >= 5) {
             dvol = 21;
@@ -496,13 +499,13 @@ module suiwin::suiwin {
                 result = 1;
             } else if (dvol == p) {
                 result = 2;
-            }
+            };
         } else {
             if (dvol < p) {
                 result = 1;
-            } else if (dvol == p) {
+            }else if (dvol == p) {
                 result = 2;
-            }
+            };
         };
         result
     }
